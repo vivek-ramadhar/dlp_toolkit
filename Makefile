@@ -31,6 +31,9 @@ bindings:
 	@$(MAKE) all BINDINGS=ON
 	@$(MAKE) install-py
 
+debug:
+	@$(MAKE) all TRACY=ON TYPE=Debug
+
 # Build with Tracy profiler
 tracy:
 	@$(MAKE) all TRACY=ON Type=Release Native=On

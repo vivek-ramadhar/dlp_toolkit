@@ -17,6 +17,10 @@ option(ENABLE_TRACY          "Enable Tracy profiler"  OFF)
 # ============================================================
 include(FetchContent)
 
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+	add_compile_definitions(DEBUG)
+endif()
+
 if(ENABLE_TRACY)
     FetchContent_Declare(
         tracy

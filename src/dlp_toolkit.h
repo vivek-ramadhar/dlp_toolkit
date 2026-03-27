@@ -1,5 +1,10 @@
 // Core library entry point for dlp_toolkit
+#include <algorithm>
+#include <cmath>
+#include <cstdint>
 #include <iostream>
+#include <format>
+#include <vector>
 #include <string>
 #include <unordered_map>
 #include <bitset>
@@ -189,7 +194,7 @@ u64 bsgs_naive(u64 g, u64 order, u64 h, u64 m) {
 		// constructing list 1
 		l1.at(0) = 1;
 		l1.at(1) = g;
-		for (int i = 2; i <= n; i++) {
+		for (u64 i = 2; i <= n; i++) {
 			u64 gi = powmod(g, i, m);
 			l1.at(i) = gi;
 		}
@@ -199,7 +204,7 @@ u64 bsgs_naive(u64 g, u64 order, u64 h, u64 m) {
 	u64 g_ninv = modinv(powmod(g, n, m), m);
 	u64 gj = 1;
 	
-	for (int j = 0; j <= n; j++) {
+	for (u64 j = 0; j <= n; j++) {
 		//
 		// u64 hg_jninv = mulmod(h, powmod(g_ninv, j, m), m);
 		u64 hg_jninv = mulmod(h, gj, m);
@@ -239,7 +244,7 @@ u64 bsgs(u64 g, u64 order, u64 h, u64 m) {
 		// constructing list 1
 		l1[1] = 0;
 		l1[g] = 1;
-		for (int i = 2; i <= n; i++) {
+		for (u64 i = 2; i <= n; i++) {
 			u64 gi = powmod(g, i, m);
 			l1[gi] = i;
 		}
@@ -249,7 +254,7 @@ u64 bsgs(u64 g, u64 order, u64 h, u64 m) {
 	// calculate values of list 2 and find match
 	u64 g_ninv = modinv(powmod(g, n, m), m);
 	u64 gj = 1;
-	for (int j = 0; j <= n; j++) {
+	for (u64 j = 0; j <= n; j++) {
 		u64 hgj = mulmod(h, gj, m);
 		{
 			#ifdef TRACY_ENABLE
@@ -286,7 +291,7 @@ u64 crt(std::vector<u64> &as, std::vector<u64> &ms) {
 	// std::cout << "M = " << M << "\n";
 
 	u64 total = 0;
-	for (int i = 0; i < n; i++) {
+	for (u64 i = 0; i < n; i++) {
 		u64 ai = as[i];
 		u64 mi = ms[i];
 
@@ -324,7 +329,7 @@ u64 ph(u64 g, u64 h, u64 p, std::vector<prime_power> order_factors) {
 	yis.resize(t);
 	ms.resize(t);
 
-	for (int i = 0; i < t; i++) {
+	for (u64 i = 0; i < t; i++) {
 		u64 qe = powmod(order_factors[i].qi, order_factors[i].ei, p);
 		u64 gi = powmod(g, N/qe, p);
 		u64 hi = powmod(h, N/qe, p);
@@ -380,7 +385,7 @@ u64 ph_fast(u64 g, u64 h, u64 p, std::vector<prime_power> order_factors) {
 		N *= qe_val;
 	}
 
-	for (int i = 0; i < t; i++) {
+	for (u64 i = 0; i < t; i++) {
 		u64 q = order_factors[i].qi;
 		u64 e = order_factors[i].ei;
 

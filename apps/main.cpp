@@ -1,7 +1,6 @@
 // #define DEBUG
 
 #include <iostream>
-#include <cmath>
 #include <format>
 #include <bitset>
 #include "../src/dlp_toolkit.h"

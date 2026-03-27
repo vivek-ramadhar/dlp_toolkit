@@ -85,6 +85,32 @@ int main() {
 	}
 	std::cout << "x = " << x << " mod(" << M << ")\n";
 
+	// TEST ph(g, h, p, order_factors)
+	g = 23;
+	h = 9689;
+	p = 11251;
+	std::vector<prime_power> N_factors =  {
+		prime_power{2, 1}, 
+		prime_power{3, 2}, 
+		prime_power{5, 4}
+	};
+	
+	x = ph(g, h, p, N_factors);
+	std::cout << std::format("DLP: {}^x = {} in F_{}\n", g, h, p) 
+		  << std::format("x = {}\n\n", x);
+
+	// TEST ph_fast(g, h, p , order_factors)
+	
+	u64 g_test, h_test;
+	g_test = 5448;
+	h_test = 6909;
+	std::vector<prime_power> N_factors_test = {
+		prime_power{5, 4}
+	};
+
+	x = ph_fast(g_test, h_test, p, N_factors);
+	std::cout << std::format("DLP: {}^x = {} in F_{}\n", g, h, p) 
+		  << std::format("x(ph_fast) = {}\n", x);
 
 	
 

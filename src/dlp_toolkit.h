@@ -149,12 +149,9 @@ u64 modinv(u64 a, u64 m) {
 	#endif
 	gcd_ctx res = gcd(a, m);
 	if (res.g != 1) {
-		std::cout << "ERROR: a and m are not coprime. inverse does not exist";
+		std::cout << "ERROR: a and m are not coprime. inverse does not exist\n";
 		return 0;
 	}
-	#ifdef DEBUG
-		std::cout << std::format("u = {}\nv = {}\ng = {}", res.u, res.v, res.g) << std::endl;
-	#endif
 	// in C++ % allows negatives so -17 % 47 = -17, not 30
 	// Have to do trick: (x % m + m) % m
 	u64 a_inv = (u64)((res.u % (i64)m + (i64)m) % (i64)m);
@@ -270,8 +267,15 @@ u64 bsgs(u64 g, u64 order, u64 h, u64 m) {
 
 // input: list of congruences x = a_i (mod m_i)
 // output: solution x mod (m_1*m_2*...*m_n) that satisfies each x = a_i (mod m_i)
-u64 crt(std::vector<u64> as, std::vector<u64> ms) {
-	assert(as.size() == ms.size());
+u64 crt(std::vector<u64> &as, std::vector<u64> &ms) {
+	#ifdef TRACY_ENABLE
+		ZoneScoped;
+	#endif
+
+	#ifdef DEBUG
+		assert(as.size() == ms.size());
+	#endif
+
 	size_t n = as.size();
 
 	u64 M = 1;
@@ -297,8 +301,151 @@ u64 crt(std::vector<u64> as, std::vector<u64> ms) {
 }
 
 struct prime_power {
-	u64 pi;
+	u64 qi;
 	u64 ei;
 };
 
-u64 pohlid_hellman(u64 g, u64 h, u64 p, std::vector<prime_power> p_factors) {}
+u64 ph(u64 g, u64 h, u64 p, std::vector<prime_power> order_factors) {
+	#ifdef TRACY_ENABLE
+		ZoneScoped;
+	#endif
+
+	size_t t = order_factors.size();
+
+	// multiply each factor together to get order N
+	u64 N = 1;
+	for (auto qe : order_factors) {
+		N *= powmod(qe.qi, qe.ei, p);
+	}
+
+
+	// crt congruences
+	std::vector<u64> yis, ms;
+	yis.resize(t);
+	ms.resize(t);
+
+	for (int i = 0; i < t; i++) {
+		u64 qe = powmod(order_factors[i].qi, order_factors[i].ei, p);
+		u64 gi = powmod(g, N/qe, p);
+		u64 hi = powmod(h, N/qe, p);
+		u64 yi = bsgs(gi, qe, hi, p);
+
+		yis[i] = yi;
+		ms[i] = qe;
+
+		#ifdef DEBUG
+			std::cout << "DEBUG @ ph\n";
+			std::cout << std::format("x_{} = {} (mod {}^{})\n", i, yi, order_factors[i].qi, order_factors[i].ei);
+
+			std::cout << "printing std::vector<u64> yis\n";
+			for (auto yi : yis) {
+				std::cout << yi << std::endl;
+			}
+
+			std::cout << "printing std::vector<u64> ms\n";
+			for (auto m : ms) {
+				std::cout << m << std::endl;
+			}
+		#endif
+
+		
+	}
+
+	u64 x = crt(yis, ms);
+
+	return x;
+}
+
+u64 ph_fast(u64 g, u64 h, u64 p, std::vector<prime_power> order_factors) {
+	#ifdef TRACY_ENABLE
+		ZoneScoped;
+	#endif
+
+	size_t t = order_factors.size();
+
+	
+
+
+	// crt congruences
+	std::vector<u64> yis, ms, as;
+	yis.resize(t);
+	// ms.resize(t);
+	as.resize(t);
+
+	// multiply each factor together to get order N
+	u64 N = 1;
+	for (auto qe : order_factors) {
+		u64 qe_val = powmod(qe.qi, qe.ei, p);
+		ms.push_back(qe_val);
+		N *= qe_val;
+	}
+
+	for (int i = 0; i < t; i++) {
+		u64 q = order_factors[i].qi;
+		u64 e = order_factors[i].ei;
+
+		// precompute powers of q: 1, q, q^2, ..., q^{e-1}
+		std::vector<u64> q_powers;
+		q_powers.resize(e);
+		q_powers[0] = 1;
+		for (size_t i = 1; i < e; i++) {
+			q_powers[i] = q_powers[i-1] * q;
+		}
+
+		#ifdef DEBUG
+			std::cout << "printing q_powers\n";
+			for (auto qe : q_powers) {
+				std::cout << qe << "\n";
+			}
+		#endif // DEBUG
+
+		std::vector<u64> x_digits;
+		x_digits.resize(e);
+
+		// calculate first digit, x_0
+		u64 hi_qe = powmod(h, powmod(q, e-1, p), p);
+		u64 gi_qe = powmod(g, powmod(q, e-1, p), p);
+		u64 xi = bsgs(gi_qe, q, hi_qe, p);
+		x_digits[0] = xi;
+		#ifdef DEBUG
+			std::cout << "x_0 = " << xi << std::endl;
+		#endif
+
+
+		// calculate digits of x_1, ..., x_{e-1}
+		for (size_t i = 1; i < e; i++) {
+			u64 exp = 0;
+			u64 qe = powmod(q, e, p);
+			// Use known x_is to construct: 
+			// g^{x_0 + x_1 * q + x_2 * q^2 + ... + x_{e-1} * q^{e-1})}
+			// up to x_{i-1}
+			for (size_t j = 0; j < i; j++) {
+				exp = addmod(exp, mulmod(x_digits[j], q_powers[i], qe), qe);
+			}
+			u64 gi_inv = modinv(powmod(g, exp, p), p);
+
+			// create new rhs of dlp
+			hi_qe = powmod(mulmod(h, gi_inv, p), powmod(q, e-(i+1), p), p);
+
+			// solve dlp for i-th digit of x
+			xi = bsgs(gi_qe, q, hi_qe, p);
+			x_digits[i] = xi;
+			#ifdef DEBUG
+				std::cout << "DEBUG @ ph_fast\n";
+				std::cout << std::format("x_{} DLP\n{}^x_{} = {}\n", i, gi_qe, i, hi_qe);
+				std::cout << std::format("x_{} = {}\n", i, xi);
+			#endif
+		}
+
+		// use all known digits of x to construct x
+		u64 x = 0;
+		for (size_t i = 0; i < e; i++) {
+			x = addmod(x, mulmod(x_digits[i], q_powers[i], p), p);
+		}
+		as[i] = x;
+	}
+
+	u64 x_final = crt(as, ms);
+	return x_final;
+
+}

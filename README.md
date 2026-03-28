@@ -3,21 +3,22 @@
 ---
 
 ```
-|-apps
-| |-CMakeLists.txt
-| |-main.cpp
-|-python
-| |-CMakeLists.txt
-| |-bindings.cpp
-| |-elliptic_curve_visualizer.py
-| |-tests.py
-|-src
-| |-CMakeLists.txt
-| |-dlp_toolkit.cpp
-| |-dlp_toolkit.h
-|-CMakeLists.txt
-|-Makefile
-|-README.md
+dlp_toolkit/
+├── apps/
+│   ├── CMakeLists.txt
+│   └── main.cpp
+├── python/
+│   ├── CMakeLists.txt
+│   ├── bindings.cpp
+│   ├── elliptic_curve_visualizer.py
+│   └── tests.py
+├── src/
+│   ├── CMakeLists.txt
+│   ├── dlp_toolkit.cpp
+│   └── dlp_toolkit.h
+├── CMakeLists.txt
+├── Makefile
+└── README.md
 ```
 
 ---
@@ -51,7 +52,8 @@ This compiles and runs the test contained inside `apps/main.cpp`. The Makefile p
 Here are the most common/important compilation options:
 
 `make debug`
-This sets the CMAKE_BUILD_TYPE to Debug, which in turn defines the macro `DEBUG` to enable certain sections of source guarded by `#ifdef DEBUG`. Additionally, it enables the TRACY compilation options which defines the `TRACY_ENABLE` macro, and builds the Tracy target.
+
+- This sets the CMAKE_BUILD_TYPE to Debug, which in turn defines the macro `DEBUG` to enable certain sections of source guarded by `#ifdef DEBUG`. Additionally, it enables the TRACY compilation options which defines the `TRACY_ENABLE` macro, and builds the Tracy target.
 
 `make tracy`
 

@@ -53,18 +53,18 @@ Here are the most common/important compilation options:
 
 `make debug`
 
-- This sets the CMAKE_BUILD_TYPE to Debug, which in turn defines the macro `DEBUG` to enable certain sections of source guarded by `#ifdef DEBUG`. Additionally, it enables the TRACY compilation options which defines the `TRACY_ENABLE` macro, and builds the Tracy target.
+This sets the CMAKE_BUILD_TYPE to Debug, which in turn defines the macro `DEBUG` to enable certain sections of source guarded by `#ifdef DEBUG`. Additionally, it enables the TRACY compilation options which defines the `TRACY_ENABLE` macro, and builds the Tracy target.
 
 `make tracy`
 
-- This sets the CMAKE_BUILD_TYPE to Release, enables the NATIVE compilation options (just `-O3 -march=native`), and enables the TRACY compilation option.
+This sets the CMAKE_BUILD_TYPE to Release, enables the NATIVE compilation options (just `-O3 -march=native`), and enables the TRACY compilation option.
 
 `make bindings`
 
-- This just enables the BINDINGS compilation option, which compiles the `python/bindings.cpp` file into a python library (PY_MODULE.so) which is then installed and copied to project root so it can be easily imported in python scripts.
+This just enables the BINDINGS compilation option, which compiles the `python/bindings.cpp` file into a python library (PY_MODULE.so) which is then installed and copied to project root so it can be easily imported in python scripts.
 
 `make clean`
 
-- This deletes all content of the build/ folder and and finds the python .so file and deletes that too.
+This deletes all content of the build/ folder and and finds the python .so file and deletes that too.
 
 ---

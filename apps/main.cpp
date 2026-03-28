@@ -51,7 +51,7 @@ int main() {
 			ZoneScopedN("bsgs@main");
 		#endif
 		// x = bsgs(g, order, h, m);
-		// x = bsgs(5, 19999999966ULL, 6567690556ULL,  19999999967ULL);
+		x = bsgs(5, 19999999966ULL, 6567690556ULL,  19999999967ULL);
 		// x = bsgs(5, 49999999966ULL, 6839120451ULL,  49999999967ULL);
 
 	}
@@ -61,7 +61,7 @@ int main() {
 			ZoneScopedN("bsgs_naive@main");
 		#endif
 		// x_naive = bsgs_naive(g, order, h, m);
-		// x_naive = bsgs_naive(5, 19999999966ULL, 6567690556ULL,  19999999967ULL); // x=6666666655
+		x_naive = bsgs_naive(5, 19999999966ULL, 6567690556ULL,  19999999967ULL); // x=6666666655
 		// x_naive = bsgs_naive(5, 49999999966ULL, 6839120451ULL,  49999999967ULL); // x=16666666655
 	}
 	std::cout << std::format("{}^x = {}\nx (naive) = {}\nx = {}", g, h, x_naive, x);
@@ -107,7 +107,13 @@ int main() {
 		prime_power{5, 4}
 	};
 
-	x = ph_fast(g_test, h_test, p, N_factors);
+	// u64 g_test1, h_test1;
+	// g_test = 5448;
+	// h_test = 6909;
+	// std::vector<prime_power> N_factors_test1 = {
+	// 	prime_power{5, 4}
+	// };
+	x = ph_fast(g, h, p, N_factors);
 	std::cout << std::format("DLP: {}^x = {} in F_{}\n", g, h, p) 
 		  << std::format("x(ph_fast) = {}\n", x);
 

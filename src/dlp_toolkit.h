@@ -232,20 +232,21 @@ u64 bsgs(u64 g, u64 order, u64 h, u64 m) {
 	#endif
 	// assuming order = p - 1
 	// u64 m = order + 1;
-		u64 n = std::ceil(std::sqrt(order));
+	u64 n = std::ceil(std::sqrt(order));
 
-		std::unordered_map<u64, int> l1;
-		l1.reserve(n+1);
-		// std::vector<u64> l2;
-		{	
+	std::unordered_map<u64, int> l1;
+	l1.reserve(n+1);
+	// std::vector<u64> l2;
+	{	
 		#ifdef TRACY_ENABLE
 			ZoneScopedN("constructing l1 @ hashmap");
 		#endif
 		// constructing list 1
 		l1[1] = 0;
 		l1[g] = 1;
+		u64 gi = g;
 		for (u64 i = 2; i <= n; i++) {
-			u64 gi = powmod(g, i, m);
+			gi = mulmod(gi, g, m);
 			l1[gi] = i;
 		}
 	}
@@ -352,8 +353,6 @@ u64 ph(u64 g, u64 h, u64 p, std::vector<prime_power> order_factors) {
 				std::cout << m << std::endl;
 			}
 		#endif
-
-		
 	}
 
 	u64 x = crt(yis, ms);
@@ -367,10 +366,7 @@ u64 ph_fast(u64 g, u64 h, u64 p, std::vector<prime_power> order_factors) {
 	#endif
 
 	size_t t = order_factors.size();
-
 	
-
-
 	// crt congruences
 	std::vector<u64> yis, ms, as;
 	yis.resize(t);
@@ -388,66 +384,76 @@ u64 ph_fast(u64 g, u64 h, u64 p, std::vector<prime_power> order_factors) {
 	for (u64 i = 0; i < t; i++) {
 		u64 q = order_factors[i].qi;
 		u64 e = order_factors[i].ei;
+		u64 qe = 1;
+		// for(u64 j = 0; j < e; j++) qe*=q;
 
 		// precompute powers of q: 1, q, q^2, ..., q^{e-1}
 		std::vector<u64> q_powers;
-		q_powers.resize(e);
+		q_powers.resize(e+1);
 		q_powers[0] = 1;
-		for (size_t i = 1; i < e; i++) {
-			q_powers[i] = q_powers[i-1] * q;
-		}
+		// q_powers[1] = q;
 
-		#ifdef DEBUG
-			std::cout << "printing q_powers\n";
-			for (auto qe : q_powers) {
-				std::cout << qe << "\n";
-			}
-		#endif // DEBUG
+		for (size_t j = 0; j < e; j++) {
+			qe *= q;
+			q_powers[j+1] = q_powers[j] * q;
+		}
 
 		std::vector<u64> x_digits;
 		x_digits.resize(e);
 
 		// calculate first digit, x_0
-		u64 hi_qe = powmod(h, powmod(q, e-1, p), p);
-		u64 gi_qe = powmod(g, powmod(q, e-1, p), p);
-		u64 xi = bsgs(gi_qe, q, hi_qe, p);
-		x_digits[0] = xi;
-		#ifdef DEBUG
-			std::cout << "x_0 = " << xi << std::endl;
-		#endif
+		u64 eps = N/qe;
+		u64 gi = powmod(g, eps, p);
+		u64 hi = powmod(h, eps, p);
+		// u64 hi_qe = powmod(hi, q_powers[e-1], p);
+		u64 gi_qe = powmod(gi, q_powers[e-1], p);
+		u64 gi_inv = modinv(gi, p);
+		u64 h_running = hi;
+		u64 x_curr = 0;
+		// u64 gi_qe = powmod(g, N/q_powers[i], p);
+		// u64 hi_qe = powmod(h, N/q_powers[i], p);
+		// u64 xi = bsgs(gi_qe, q, hi_qe, p);
+		// x_digits[0] = xi;
 
 
 		// calculate digits of x_1, ..., x_{e-1}
-		for (size_t i = 1; i < e; i++) {
+		for (size_t j = 0; j < e; j++) {
 			u64 exp = 0;
-			u64 qe = powmod(q, e, p);
+			u64 hi_qe = powmod(h_running, q_powers[e - 1 - j], p);
+			u64 xj = bsgs(gi_qe, q, hi_qe, p);
+			x_digits[j] = xj;
+
+			u64 digit_contribution = powmod(gi_inv, mulmod(xj, q_powers[j], qe), p);
+			h_running = mulmod(h_running, digit_contribution, p);
+			x_curr = (x_curr + xj * q_powers[j]) % qe;
+			// u64 qe = powmod(q, e, p);
 			// Use known x_is to construct: 
 			// g^{x_0 + x_1 * q + x_2 * q^2 + ... + x_{e-1} * q^{e-1})}
 			// up to x_{i-1}
-			for (size_t j = 0; j < i; j++) {
-				exp = addmod(exp, mulmod(x_digits[j], q_powers[i], qe), qe);
-			}
-			u64 gi_inv = modinv(powmod(g, exp, p), p);
+			// for (size_t k = 0; k < j; k++) {
+			// 	exp = addmod(exp, mulmod(x_digits[k], q_powers[k], qe), qe);
+			// }
+			// u64 gi_inv = modinv(powmod(gi, exp, p), p);
 
 			// create new rhs of dlp
-			hi_qe = powmod(mulmod(h, gi_inv, p), powmod(q, e-(i+1), p), p);
+			// hi_qe = powmod(mulmod(hi, gi_inv, p), q_powers[e - 1 - j], p);
 
 			// solve dlp for i-th digit of x
-			xi = bsgs(gi_qe, q, hi_qe, p);
-			x_digits[i] = xi;
+			// xi = bsgs(gi_qe, q, hi_qe, p);
+			// x_digits[j] = xi;
 			#ifdef DEBUG
 				std::cout << "DEBUG @ ph_fast\n";
 				std::cout << std::format("x_{} DLP\n{}^x_{} = {}\n", i, gi_qe, i, hi_qe);
-				std::cout << std::format("x_{} = {}\n", i, xi);
+				std::cout << std::format("x_{} = {}\n", j, xj);
 			#endif
 		}
 
 		// use all known digits of x to construct x
-		u64 x = 0;
-		for (size_t i = 0; i < e; i++) {
-			x = addmod(x, mulmod(x_digits[i], q_powers[i], p), p);
-		}
-		as[i] = x;
+		// u64 x = 0;
+		// for (size_t j = 0; j < e; j++) {
+		// 	x = (x + (x_digits[j] * q_powers[j])) % qe;
+		// }
+		as[i] = x_curr;
 	}
 
 	u64 x_final = crt(as, ms);

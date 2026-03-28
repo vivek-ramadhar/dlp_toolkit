@@ -2,6 +2,9 @@ BUILD     := build
 TARGET    := dlp_toolkit# must match project() in CMakeLists.txt
 PY_MODULE := dlp_toolkit_py  # what you import in Python
 
+JOBS := $(shell nproc 2>/dev/null || sysctl -n hw.logicalcpu)
+MAKEFLAGS += --jobs=$(JOBS)
+
 # ── Flags ─────────────────────────────────────────────────────────────────────
 BINDINGS  ?= OFF   # make bindings BINDINGS=ON
 TRACY     ?= OFF   # make tracy    TRACY=ON
@@ -21,7 +24,7 @@ CMAKE_FLAGS := \
 all:
 	@cmake -B $(BUILD) -S . $(CMAKE_FLAGS) 2>/dev/null
 	@cmake --build $(BUILD) --parallel
-	@echo "✓  $(TARGET) built"
+	@echo "✓  $(TARGET) built ($(JOBS) jobs)"
 
 run: all
 	@./$(BUILD)/$(TARGET)
@@ -36,7 +39,7 @@ debug:
 
 # Build with Tracy profiler
 tracy:
-	@$(MAKE) all TRACY=ON Type=Release Native=On
+	@$(MAKE) all TRACY=ON TYPE=Release NATIVE=On
 
 # Build everything together
 full:

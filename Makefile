@@ -26,8 +26,8 @@ all:
 	@cmake --build $(BUILD) --parallel
 	@echo "✓  $(TARGET) built ($(JOBS) jobs)"
 
-run: all
-	@./$(BUILD)/$(TARGET)
+# run: all
+# 	@./$(BUILD)/$(TARGET)
 
 # Build with Python bindings
 bindings:
@@ -51,17 +51,17 @@ release:
 # Copy the .so to the project root so `import MyProject_py` just works
 install-py:
 	@cmake --install $(BUILD) --prefix .
-	@echo "✓  $(PY_MODULE).so installed — you can now: python -c 'import $(PY_MODULE)'"
+	@echo "$(PY_MODULE).so installed — you can now: python -c 'import $(PY_MODULE)'"
 
 clean:
 	@rm -rf $(BUILD)
 	@find . -name "$(PY_MODULE)*.so" -delete 2>/dev/null; true
-	@echo "✓  Cleaned"
+	@echo "Cleaned"
 
 help:
 	@echo ""
 	@echo "  make            →  build C++ exe"
-	@echo "  make run        →  build + run exe"
+	# @echo "  make run        →  build + run exe"
 	@echo "  make bindings   →  build Python .so  (BINDINGS=ON)"
 	@echo "  make tracy      →  build with Tracy  (TRACY=ON)"
 	@echo "  make full       →  build with both"

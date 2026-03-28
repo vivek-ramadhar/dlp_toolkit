@@ -4,12 +4,12 @@
 
 file(GLOB_RECURSE CORE_SOURCES CONFIGURE_DEPENDS "*.cpp" "*.h" "*.hpp")
 
+add_library(myproject_core STATIC ${CORE_SOURCES})
+
 option(NATIVE_OPTIMIZATIONS "Enable -O3 -march-native" OFF)
 if (NATIVE_OPTIMIZATIONS)
 	target_compile_options(myproject_core PRIVATE -O3 -march=native)
 endif()
-
-add_library(myproject_core STATIC ${CORE_SOURCES})
 
 target_include_directories(myproject_core
     PUBLIC  ${CMAKE_SOURCE_DIR}/include

@@ -2,7 +2,7 @@
 
 ---
 
-A C++ implementation of the Baby-steps Giant-steps algorithm and Pohlig-Hellman algorithm over finite fields. All core functions are profiled with Tracy. Inspired by taking an applied number theory course using Hoffstein-Pipher-Silverman.
+A C++ implementation of the Baby-steps Giant-steps algorithm and Pohlig-Hellman algorithm over finite fields. All core functions are profiled with Tracy. Inspired by taking an applied number theory course using Hoffstein-Pipher-Silverman. Demonstrates Pohligh-Hellman achieving a 666x speedup compared with a linear scan.
 
 Implements and benchmarks four algorithms of increasing sophistication. It starts with `bsgs_naive()` which constructs the list as a vector of unsigned 64-bit integers and does a linear search for each element of list 2. (Fun fact: The real BSGS algorithm doesn't even suggest this, doing a binary search for the collision instead. I just thought this would be an interesting comparison of different C++ containers.) I then implemented the more optimized version of `bsgs()` which swaps the `std::vector<u64>` for a `std::unordered_map<u64, u64>`. This makes searching for the collision value reduce to computing a hash function of a candidate value instead of linear search. Next, I implement the Pohlig-Hellman algorithm which leverages the factorization of p-1 for a finite field F_p, reducing the search space. The key here is that the naive Pohlig-Hellman (`ph_naive()`) reduces the search space to subgroups of prime-power order and the full Pohlig-Hellman (`ph()`) reduces prime-power order searches to just prime order searches. The result is **~666x speedup over `bsgs_naive()` on a 30-bit prime**.
 
@@ -16,6 +16,7 @@ Implements and benchmarks four algorithms of increasing sophistication. It start
 | `bsgs`       | Baby-step Giant-step with hashmap lookup                                                      |
 | `ph_naive`   | Pohlig-Hellman: reduces DLP to subgroup DLPs, solves each with `bsgs`                         |
 | `ph`         | Pohlig-Hellman: reduces prime-power order (`q^e`) subgroup DLPs to `e` prime order (`q`) DLPs |
+| `crt`        | Computes the unique value x that satisfies a list of linear congruences                       |
 | `powmod`     | Returns a^b mod m using the fast-powering algoirthm.                                          |
 | `mulmod`     | Returns (a \* b) mod m. Promotes to u128 before multiplciation to prevent overflow.           |
 | `addmod`     | Returns (a \+ b) mod m. Promotes to u128 before addition to prevent overflow.                 |
@@ -85,7 +86,7 @@ dlp_toolkit/
 - pybind11 v2.11.1
 - python3-dev ( for python bindings )
 
-Tracy and pybind11 are fetched and installed using CMake's FetchContent_Declare() function. Thus, they are only installed when needed or specified by compile options. To actually observe and interact with the Tracy profiled code, you do need to install the tracy-profiler executable separately. Tracy is very particular about versioning. The executable version MUST MATCH THE EXACT sourcec dependcy version. This project compiles with Tracy v0.13.1 .
+Tracy and pybind11 are fetched and installed using CMake's FetchContent_Declare() function. Thus, they are only installed when needed or specified by compile options. To actually observe and interact with the Tracy profiled code, you do need to install the tracy-profiler executable separately. Tracy is very particular about versioning. The executable version MUST MATCH THE EXACT source dependency version. This project compiles with Tracy v0.13.1 .
 
 ## Quick-Setup
 

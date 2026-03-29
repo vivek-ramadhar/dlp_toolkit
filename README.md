@@ -35,21 +35,21 @@ All timings from Tracy instrumented builds compiled using the `make tracy` compi
 | `ph_naive`   | 250.89 µs | 91.45 KB    | ~51x                    |
 | `ph`         | 19.15 µs  | 569 Bytes   | ~666x                   |
 
-### `bsgs_naive` -- 12.75ms, 259.77KB
+### `bsgs_naive`
 
 ![bsgs_naive Tracy Profile](docs/bsgs_naive.png)
 
-### `bsgs` -- 2.53ms, 1000.33KB
+### `bsgs`
 
-~[bsgs Tracy profile](docs/bsgs.png)
+![bsgs Tracy profile](docs/bsgs.png)
 
-### `ph_naive` -- 250.89µs, 91KB,
+### `ph_naive`
 
-~[ph_naive Tracy profile](docs/ph_naive.png)
+![ph_naive Tracy profile](docs/ph_naive.png)
 
-### `ph`, 19.15µs, 569 bytes
+### `ph`
 
-~[ph Tracy profile](docs/ph.png)
+![ph Tracy profile](docs/ph.png)
 
 ## Project File Structure
 

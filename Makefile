@@ -46,7 +46,7 @@ full:
 	@$(MAKE) all BINDINGS=ON TRACY=ON
 
 release:
-	@$(MAKE) all TYPE=Release
+	@$(MAKE) all TYPE=Release NATIVE=On
 
 # Copy the .so to the project root so `import MyProject_py` just works
 install-py:
